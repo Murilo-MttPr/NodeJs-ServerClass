@@ -1,5 +1,5 @@
 const path = require('path');
-
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -12,7 +12,7 @@ const multer = require('multer');
 const errorController = require('./controllers/error');
 const User = require('./models/user');
 
-const MONGODB_URI = 'mongodb+srv://mottapradoestudos:j2490E3PxAg3yJe1@cluster0.kwspleu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.kwspleu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const app = express();
 const store = new MongoDBStore({
@@ -114,7 +114,7 @@ app.use((error, req, res, next) => {
 
 mongoose.connect(MONGODB_URI)
 .then(result => {
-  app.listen(3000)
+  app.listen(process.env.PORT || 3000)
 })
 .catch(err => {
   console.log(err)
