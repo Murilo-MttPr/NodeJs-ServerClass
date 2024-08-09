@@ -8,13 +8,17 @@ const MongoDBStore = require('connect-mongodb-session')(session);
 const csrf = require('csurf');
 const flash = require('connect-flash');
 const multer = require('multer');
-
+const helmet = require('helmet');
+const compression = require('compression')
+const morgan = require('morgan')
 const errorController = require('./controllers/error');
 const User = require('./models/user');
+const fs = require('fs')
 
 const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.kwspleu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 const app = express();
+
 const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: 'sessions'
@@ -53,6 +57,11 @@ const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 
+const acessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'})
+
+app.use(helmet()); // Segurança para headers
+app.use(compression()); // Compressão dos arquivos para deploy
+app.use(morgan('combined', {stream: acessLogStream})); // Logging dos usuarios
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -70,6 +79,7 @@ app.use(session({
 
 app.use(csrfProtection);
 app.use(flash());
+
 
 app.use((req,res,next)=> {
   res.locals.isAuthenticated = req.session.isLoggedIn;
